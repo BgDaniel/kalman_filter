@@ -87,7 +87,16 @@ class Schwartz1FactorModel:
     def Paths(self):
         return self._paths
 
-    def __init__(self, config, S0, theta, sigma):
+    @property
+    def Dt(self):
+        return self._dt
+
+    @property
+    def Sigma(self):
+        return self._sigma
+
+
+    def __init__(self, config, S0, kappa, theta, sigma):
         self._config = config
         self._S0 = S0
         self._kappa = kappa
@@ -97,7 +106,7 @@ class Schwartz1FactorModel:
         self._nbSteps = self._config.TimeSteps
         self._dt = self._config.Dt
         self._dt_sqrt = math.sqrt(self._dt)
-        self._dW_t = np.random.normal(size =(self._nbSimus, self._nbSteps-1)) * dt_sqrt
+        self._dW_t = np.random.normal(size =(self._nbSimus, self._nbSteps-1)) * self._dt_sqrt
 
     def simulate(self):
         self._paths = np.zeros((self._nbSimus, self._config.TimeSteps))
@@ -107,5 +116,6 @@ class Schwartz1FactorModel:
 
         for simu in range(0, self._nbSimus):
             for time in range(1, self._nbSteps):
-                self._paths[simu,time] = self._paths[simu,time-1] * (1.0 + self._kappa * (self._theta - math.log(self._paths[simu,time-1]))) /\
-                    + self._sigma * self._dW_t[simu,time-1] 
+                self._paths[simu,time] = self._paths[simu,time-1] * (1.0 + self._kappa * (self._theta - math.log(self._paths[simu,time-1])) * self._dt /\
+                    + self._sigma * self._dW_t[simu,time-1]) 
+                    

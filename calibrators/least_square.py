@@ -1,11 +1,11 @@
 import math
 from scipy.stats import norm
 from sklearn.linear_model import LinearRegression
-from calibrator_base import CalibratorBase
+from calibrators.calibrator_base import CalibratorBase
 
 class LeastSquare(CalibratorBase):
     def __init__(self, path, schwartz_model):
-        CalibratorBase.__init__(self, path)
+        CalibratorBase.__init__(self, path, schwartz_model)
         self._nbSamples = len(path) - 1
 
     def calibrate(self):
