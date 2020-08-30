@@ -25,7 +25,7 @@ class SimulationConfig:
         self._T = T
         self._numberSimus = numberSimus
         self._timeSteps = timeSteps
-        self._dt = .0
+        self._dt = T / self._timeSteps
 
 class Mu:
     @property

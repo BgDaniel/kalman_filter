@@ -95,6 +95,13 @@ class Schwartz1FactorModel:
     def Sigma(self):
         return self._sigma
 
+    @property
+    def Kappa(self):
+        return self._kappa
+
+    @property
+    def Theta(self):
+        return self._theta
 
     def __init__(self, config, S0, kappa, theta, sigma):
         self._config = config
@@ -110,12 +117,13 @@ class Schwartz1FactorModel:
 
     def simulate(self):
         self._paths = np.zeros((self._nbSimus, self._config.TimeSteps))
-        
+
         for simu in range(0, self._nbSimus):
             self._paths[simu,0] = self._S0
 
         for simu in range(0, self._nbSimus):
             for time in range(1, self._nbSteps):
-                self._paths[simu,time] = self._paths[simu,time-1] * (1.0 + self._kappa * (self._theta - math.log(self._paths[simu,time-1])) * self._dt /\
-                    + self._sigma * self._dW_t[simu,time-1]) 
+                _path_old = math.log(self._paths[simu,time-1])                 
+                _path_next = _path_old + self._kappa * (self._theta - _path_old) * self._dt + self._sigma * self._dW_t[simu,time-1] 
+                self._paths[simu,time] = math.exp(_path_next)
                     
