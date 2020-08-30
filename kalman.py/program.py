@@ -18,19 +18,19 @@ system = DynamicSystem(x0, X, Z, cov_X, cov_Z)
 nb_times = 100
 x, z = system.simulate(nb_times)
 
-#plt.plot(z[:,0], z[:,1])
-#plt.show()
+plt.plot(z[:,0], z[:,1])
+plt.show()
 
-#plt.plot(x[:,0], x[:,1])
-#plt.show()
+plt.plot(x[:,0], x[:,1])
+plt.show()
 
 kalman_filter = KalmanSchwartzFilter(system)
 x_hat, P, K, x_hat_0 = kalman_filter.filter(z)
 
 #plot estimate of hidden variable path compare to real value
-#plt.plot(x[:,0], x[:,1])
-#plt.plot(x_hat[:,0], x_hat[:,1])
-#plt.show()
+plt.plot(x[:,0], x[:,1])
+plt.plot(x_hat[:,0], x_hat[:,1])
+plt.show()
 
 nb_simus = 1000
 X = np.zeros((nb_simus,nb_times,nb_dims))
@@ -38,8 +38,8 @@ X_hat = np.zeros((nb_simus,nb_times,nb_dims))
 X_hat_0 = np.zeros((nb_simus,nb_times,nb_dims))
 
 for iSimu in range(0, nb_simus):
-    X[iSimu], _ = system.simulate(nb_times)
-    X_hat[iSimu], P, K, X_hat_0[iSimu] = kalman_filter.filter(X[iSimu])
+    X[iSimu], Z = system.simulate(nb_times)
+    X_hat[iSimu], P, K, X_hat_0[iSimu] = kalman_filter.filter(Z)
 
 #create statistics
 mean_X = np.zeros((nb_times,nb_dims))
