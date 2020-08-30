@@ -27,7 +27,7 @@ class KalmanSchwartzFilter:
         trace_before = np.trace(P)
         P = self._compute_P(K, P)
         trace_after = np.trace(P)
-        reduction_trace = 100.0 * (trace_after - trace_before) / trace_before
+        #reduction_trace = 100.0 * (trace_after - trace_before) / trace_before
 
         #print('Trace reduced by {0} percent in step {1}.'.format(reduction_trace, step))     
 
