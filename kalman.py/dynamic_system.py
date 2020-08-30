@@ -35,7 +35,7 @@ class DynamicSystem:
 
     def simulate(self, nb_steps):
         x = np.zeros((nb_steps, self._dim))
-        z = np.zeros((nb_steps, self._dim))
+        z = np.zeros((nb_steps-1, self._dim))
 
         x[0] = self._x0
         

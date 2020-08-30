@@ -5,19 +5,58 @@ from dynamic_system import DynamicSystem
 from linear_kalman_filter import KalmanSchwartzFilter
 
 x0 = np.array([2.0, .0])
-X = np.array([[.0, - 1.0], [1.0, .0]])
+nb_dims = len(x0)
+dphi = 2.0 * math.pi * .01
+X = np.array([[math.cos(dphi), - math.sin(dphi)], [math.sin(dphi), math.cos(dphi)]])
 SQUARE_ROOT_TWO = math.sqrt(2.0)
 Z = np.array([[1.0 / SQUARE_ROOT_TWO, 1.0 / SQUARE_ROOT_TWO], [1.0 / SQUARE_ROOT_TWO, -1.0 / SQUARE_ROOT_TWO]])
 
-cov_X = np.array(([[.01, -.03], [-.03, 0.06]]))
-cov_Z = np.array(([[.08, +.04], [+.04, 0.03]]))
+cov_X = np.array(([[.015, -.01], [-.01, 0.015]]))
+cov_Z = np.array(([[.02, +.01], [+.01, 0.015]]))
 
 system = DynamicSystem(x0, X, Z, cov_X, cov_Z)
-x, z = system.simulate(100)
+nb_times = 100
+x, z = system.simulate(nb_times)
 
-#plt.plot(z[:,0], z[:,1])
+plt.plot(z[:,0], z[:,1])
+#plt.show()
+
+plt.plot(x[:,0], x[:,1])
 #plt.show()
 
 kalman_filter = KalmanSchwartzFilter(system)
-kalman_filter.filter()
+x_hat, P, K, x_hat_0 = kalman_filter.filter(z)
+
+#plot estimate of hidden variable path compare to real value
+plt.plot(x[:,0], x[:,1])
+plt.plot(x_hat[:,0], x_hat[:,1])
+#plt.show()
+
+nb_simus = 100
+X = np.zeros((nb_simus,nb_times-1,nb_dims))
+X_hat = np.zeros((nb_simus,nb_times-1,nb_dims))
+X_hat_0 = np.zeros((nb_simus,nb_times-1,nb_dims))
+
+for iSimu in range(0, nb_simus):
+    X[iSimu], _ = system.simulate(100)
+    X_hat[iSimu], P, K, X_hat_0[iSimu] = kalman_filter.filter(z)
+
+#create statistics
+mean_X = np.zeros((nb_times-1,nb_dims)
+mean_X_hat = np.zeros((nb_times-1,nb_dims))
+mean_X_hat_0 = np.zeros((nb_times-1,nb_dims))
+
+for iTime in range(0, nb_times):
+    for iDim in range(0, nb_dims):
+        for iSimu in range(0, nb_simus):
+            mean_X[iTime,iDim] += X[iSimu,iTime,iDim] / float(nb_simus)
+            mean_X_hat[iTime,iDim] += X_hat[iSimu,iTime,iDim] / float(nb_simus)
+            mean_X_hat_0[iTime,iDim] += X_hat_0[iSimu,iTime,iDim] / float(nb_simus)
+
+
+plt.plot(mean_X, color='red')
+plt.plot(mean_X_hat, color='green')
+plt.plot(mean_X_hat_0, color='yellow')
+plt.show()
+
 
