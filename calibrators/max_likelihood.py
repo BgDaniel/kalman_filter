@@ -12,25 +12,32 @@ class MaxLikelihood(CalibratorBase):
         self._kappa = schwartz_model.Kappa
         self._theta = schwartz_model.Theta
 
-    def _theta(self, kappa):
-        val = .0
+    def _determine_theta(self, kappa):
+        theta = .0
 
         for i in range(0, self._nbSamples):
-            val += math.log(self._path[i + 1] / self._path[i]) / self._dt + kappa * math.log(self._path[i])
+            theta += math.log(self._path[i + 1] / self._path[i]) + kappa * math.log(self._path[i]) * self._dt
 
-        return val / (float(self._nbSamples) * kappa)
-
-    def _d_kappa(self, kappa):
-        theta = self._theta(kappa)
+        theta /= (float(self._nbSamples) * kappa * self._dt)
 
         if True:
-            self.cross_check(kappa, theta)
+            cross_check = .0
+
+            for i in range(0, self._nbSamples):
+                cross_check +=  math.log(self._path[i + 1] / self._path[i]) - kappa * (theta - math.log(self._path[i])) * self._dt
+
+            assert abs(cross_check) < 1e-10, 'Error in _theta!'
+
+        return theta
+
+    def _d_kappa(self, kappa):
+        theta = self._determine_theta(kappa)
 
         d_kappa = .0
 
         for i in range(0, self._nbSamples):
             x_i = math.log(self._path[i + 1] / self._path[i]) - kappa * (theta - math.log(self._path[i])) * self._dt
-            x_i *= math.log(self._path[i])
+            x_i *= (theta - math.log(self._path[i]))
             d_kappa += x_i
 
         return d_kappa
@@ -49,15 +56,15 @@ class MaxLikelihood(CalibratorBase):
 
 
     def calibrate(self): 
-        kappa0 = .3
+        kappa0 = 10.0
 
         sol = opt.root(self._d_kappa, kappa0)
 
         if sol.success:
-            kappa, theta = sol.x[0], self._theta(sol.x[0])
+            kappa, theta = sol.x[0], self._determine_theta(sol.x[0])
             return True, kappa, theta
 
-        return False, None
+        return False, None, None
 
     def calibrate_theta(self): 
         theta = .0
