@@ -18,19 +18,19 @@ system = DynamicSystem(x0, X, Z, cov_X, cov_Z)
 nb_times = 100
 x, z = system.simulate(nb_times)
 
-plt.plot(z[:,0], z[:,1])
-plt.show()
+#plt.plot(z[:,0], z[:,1])
+#plt.show()
 
-plt.plot(x[:,0], x[:,1])
-plt.show()
+#plt.plot(x[:,0], x[:,1])
+#plt.show()
 
 kalman_filter = KalmanSchwartzFilter(system)
 x_hat, P, K, x_hat_0 = kalman_filter.filter(z)
 
 #plot estimate of hidden variable path compare to real value
-plt.plot(x[:,0], x[:,1])
-plt.plot(x_hat[:,0], x_hat[:,1])
-plt.show()
+#plt.plot(x[:,0], x[:,1])
+#plt.plot(x_hat[:,0], x_hat[:,1])
+#plt.show()
 
 nb_simus = 1000
 X = np.zeros((nb_simus,nb_times,nb_dims))
@@ -64,12 +64,14 @@ stdev_X_hat_0 = np.zeros((nb_times,nb_dims))
 for iTime in range(0, nb_times):
     for iDim in range(0, nb_dims):
         for iSimu in range(0, nb_simus):
-            stdev_X_hat[iTime,iDim] += (X_hat[iSimu,iTime,iDim] - mean_X[iTime,iDim]) * (X_hat[iSimu,iTime,iDim] - mean_X[iTime,iDim]) / float(nb_simus-1)
-            stdev_X_hat_0[iTime,iDim] += (X_hat_0[iSimu,iTime,iDim] - mean_X[iTime,iDim]) * (X_hat_0[iSimu,iTime,iDim] - mean_X[iTime,iDim]) / float(nb_simus-1)
+            stdev_X_hat[iTime,iDim] += (X_hat[iSimu,iTime,iDim] - X[iSimu,iTime,iDim]) * (X_hat[iSimu,iTime,iDim] - X[iSimu,iTime,iDim]) / float(nb_simus-1)
+            stdev_X_hat_0[iTime,iDim] += (X_hat_0[iSimu,iTime,iDim] - X[iSimu,iTime,iDim]) * (X_hat_0[iSimu,iTime,iDim] - X[iSimu,iTime,iDim]) / float(nb_simus-1)
 
         stdev_X_hat[iTime,iDim] = math.sqrt(stdev_X_hat[iTime,iDim])
         stdev_X_hat_0[iTime,iDim] = math.sqrt(stdev_X_hat_0[iTime,iDim])
 
-plt.plot(stdev_X_hat[:,0], stdev_X_hat[:,1], color='red')
-plt.plot(stdev_X_hat_0[:,0], stdev_X_hat_0[:,1], color='green')
-plt.show()
+for iDim in range(0, nb_dims):
+    plt.plot(stdev_X_hat[:,iDim], color='red')
+    plt.plot(stdev_X_hat_0[:,iDim], color='green')
+    plt.ylim(.0, max(np.max(stdev_X_hat[:,iDim]), np.max(stdev_X_hat_0[:,iDim]))) 
+    plt.show()
